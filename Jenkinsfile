@@ -22,6 +22,8 @@ pipeline{
             steps {
                 script {
                     sh '''
+                        docker stop ${CONTAINTER_NAME} || true
+                        docker rm ${CONTAINTER_NAME} || true
                         docker run -d -p 8081:8080 --name ${CONTAINTER_NAME} ${IMAGE_NAME}
                         curl http://localhost:8081 
                     '''
@@ -35,8 +37,8 @@ pipeline{
             steps {
                 script {
                     sh '''
-                        docker stop ${CONTAINTER_NAME}
-                        docker rm ${CONTAINTER_NAME}
+                        docker stop ${CONTAINTER_NAME} || true
+                        docker rm ${CONTAINTER_NAME} || true
                         docker tag ${IMAGE_NAME} ${USERNAME}/${IMAGE_NAME}:${IMAGE_TAG}
                         docker login -u ${USERNAME} -p ${PASSWORD}
                         docker push ${USERNAME}/${IMAGE_NAME}:${IMAGE_TAG}
