@@ -115,10 +115,10 @@ pipeline{
                                 apk update
                                 which ssh-agent || ( apk add openssh-client )
                                 eval $(ssh-agent -s)
-                                ssh -o StrictHostKeyChecking=no -i ${keyfile} ${sshuser}@${PRODUCTION} docker stop $CONTAINER_NAME || true
-                                ssh -o StrictHostKeyChecking=no -i ${keyfile} ${sshuser}@${PRODUCTION} docker rm $CONTAINER_NAME || true
+                                ssh -o StrictHostKeyChecking=no -i ${keyfile} ${sshuser}@${PRODUCTION} docker stop $CONTAINTER_NAME || true
+                                ssh -o StrictHostKeyChecking=no -i ${keyfile} ${sshuser}@${PRODUCTION} docker rm $CONTAINTER_NAME || true
                                 ssh -o StrictHostKeyChecking=no -i ${keyfile} ${sshuser}@${PRODUCTION} docker rmi $USERNAME/$IMAGE_NAME:$IMAGE_TAG || true
-                                ssh -o StrictHostKeyChecking=no -i ${keyfile} ${sshuser}@${PRODUCTION} docker run --name ${CONTAINER_NAME} -d -e PORT=5000 -p 80:5000 $USERNAME/$IMAGE_NAME:$IMAGE_TAG
+                                ssh -o StrictHostKeyChecking=no -i ${keyfile} ${sshuser}@${PRODUCTION} docker run --name ${CONTAINTER_NAME} -d -e PORT=5000 -p 80:5000 $USERNAME/$IMAGE_NAME:$IMAGE_TAG
                             '''
                         }
                     }
