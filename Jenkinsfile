@@ -55,6 +55,7 @@ pipeline{
                         sh '''
                             ssh -o StrictHostKeyChecking=no -i ${keyfile} -y ${sshuser}@${STAGING} -C docker stop ${CONTAINTER_NAME} || true
                             ssh -o StrictHostKeyChecking=no -i ${keyfile} -y ${sshuser}@${STAGING} -C docker rm ${CONTAINTER_NAME} || true                      
+                            ssh -o StrictHostKeyChecking=no -i ${keyfile} -y ${sshuser}@${PRODUCTION} -C docker rmi ${USERNAME}/${IMAGE_NAME}:${IMAGE_TAG} || true                       
                             ssh -o StrictHostKeyChecking=no -i ${keyfile} -y ${sshuser}@${STAGING} -C docker run -d -p 80:80 --name ${CONTAINTER_NAME} ${USERNAME}/${IMAGE_NAME}:${IMAGE_TAG}
                             ssh -o StrictHostKeyChecking=no -i ${keyfile} -y ${sshuser}@${STAGING} -C sleep 5
                             ssh -o StrictHostKeyChecking=no -i ${keyfile} -y ${sshuser}@${STAGING} -C curl http://localhost:80
@@ -73,6 +74,7 @@ pipeline{
                         sh '''
                             ssh -o StrictHostKeyChecking=no -i ${keyfile} -y ${sshuser}@${PRODUCTION} -C docker stop ${CONTAINTER_NAME} || true
                             ssh -o StrictHostKeyChecking=no -i ${keyfile} -y ${sshuser}@${PRODUCTION} -C docker rm ${CONTAINTER_NAME} || true                       
+                            ssh -o StrictHostKeyChecking=no -i ${keyfile} -y ${sshuser}@${PRODUCTION} -C docker rmi ${USERNAME}/${IMAGE_NAME}:${IMAGE_TAG} || true                       
                             ssh -o StrictHostKeyChecking=no -i ${keyfile} -y ${sshuser}@${PRODUCTION} -C docker run -d -p 80:80 --name ${CONTAINTER_NAME} ${USERNAME}/${IMAGE_NAME}:${IMAGE_TAG}
                             ssh -o StrictHostKeyChecking=no -i ${keyfile} -y ${sshuser}@${STAGING} -C sleep 5
                             ssh -o StrictHostKeyChecking=no -i ${keyfile} -y ${sshuser}@${PRODUCTION} -C curl http://localhost:80
