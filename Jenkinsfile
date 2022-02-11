@@ -14,7 +14,6 @@ pipeline{
             steps {
                 script {
                     sh 'docker build -t ${IMAGE_NAME} .'
-
                 }
             }
         }
@@ -53,7 +52,7 @@ pipeline{
                 PASSWORD=credentials('credential_ec2')
             }
             steps {
-                withCredentials([sshUserPrivate(credentialsId: "credential_ec2", keyFileVariable: 'keyfile', username: 'sshuser')])
+                withCredentials([sshUserPrivate(credentialsId: "credential_ec2", keyFileVariable: 'keyfile', usernameVariable: 'sshuser')])
                 catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE')
                 script {
                     sh '''
@@ -67,7 +66,7 @@ pipeline{
         }
         stage ('Deploy prod') {
             steps {
-                withCredentials([sshUserPrivate(credentialsId: "credential_ec2", keyFileVariable: 'keyfile', username: 'sshuser')])
+                withCredentials([sshUserPrivate(credentialsId: "credential_ec2", keyFileVariable: 'keyfile', usernameVariable: 'sshuser')])
                 catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE')
                 script {
                     timeout(time: 15, unit: "MINUTES") {
