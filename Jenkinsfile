@@ -23,7 +23,7 @@ pipeline{
                     sh '''
                         docker stop ${CONTAINTER_NAME} || true
                         docker rm ${CONTAINTER_NAME} || true
-                        docker run -d -p 8081:8080 --name ${CONTAINTER_NAME} ${IMAGE_NAME}
+                        docker run -d -p 8081:80 --name ${CONTAINTER_NAME} ${IMAGE_NAME}
                         sleep 5
                         curl http://localhost:8081 
                     '''

@@ -1,4 +1,4 @@
 FROM nginx
 COPY . /var/www/html/
-EXPOSE 8080
+EXPOSE 80
 CMD ["/usr/sbin/nginx", "-g", "daemon off;"]
