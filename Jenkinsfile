@@ -51,33 +51,31 @@ pipeline{
                 PASSWORD=credentials('credential_ec2')
             }
             step {
+                withCredentials([sshUserPrivate(credentialsId: "credential_ec2", keyFileVariable: 'keyfile', username: 'sshuser'])
+                catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE')
                 script {
                     sh '''
-                        ssh add ${PASSWORD}
-                        ssh -i ${PASSWORD} -y ubuntu@${STAGING}
-                        docker stop ${CONTAINTER_NAME} || true
-                        docker rm ${CONTAINTER_NAME} || true
-                        docker run -d -p 80:8080 --name ${CONTAINTER_NAME} ${USERNAME}/${IMAGE_NAME}:${IMAGE_TAG}
-                        curl http://localhost:80
+                        ssh -o StrictHostKeyChecking=no -i ${keyfile} -y ${sshuser}@${STAGING} -C \'docker stop ${CONTAINTER_NAME} || true\'
+                        ssh -o StrictHostKeyChecking=no -i ${keyfile} -y ${sshuser}@${STAGING} -C \'docker rm ${CONTAINTER_NAME} || true\'                        
+                        ssh -o StrictHostKeyChecking=no -i ${keyfile} -y ${sshuser}@${STAGING} -C \'docker run -d -p 80:8080 --name ${CONTAINTER_NAME} ${USERNAME}/${IMAGE_NAME}:${IMAGE_TAG}\'
+                        ssh -o StrictHostKeyChecking=no -i ${keyfile} -y ${sshuser}@${STAGING} -C \'curl http://localhost:80\'
                     '''
                 }
             }
         }
         stage ('Deploy prod') {
-            environment {
-                PASSWORD=credentials('credential_ec2')
-            }
             step {
+                withCredentials([sshUserPrivate(credentialsId: "credential_ec2", keyFileVariable: 'keyfile', username: 'sshuser'])
+                catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE')
                 script {
                     timeout(time: 15, unit: "MINUTES") {
                         input message: 'Do you want to approve the deploy in production?', ok: 'Yes'
                     }
                     sh '''
-                        ssh -i ${PASSWORD} -y ubuntu@${PRODUCTION}
-                        docker stop ${CONTAINTER_NAME} || true
-                        docker rm ${CONTAINTER_NAME} || true
-                        docker run -d -p 80:8080 --name ${CONTAINTER_NAME} ${USERNAME}/${IMAGE_NAME}:${IMAGE_TAG}
-                        curl http://localhost:80
+                        ssh -o StrictHostKeyChecking=no -i ${keyfile} -y ${sshuser}@${PRODUCTION} -C \'docker stop ${CONTAINTER_NAME} || true\'
+                        ssh -o StrictHostKeyChecking=no -i ${keyfile} -y ${sshuser}@${PRODUCTION} -C \'docker rm ${CONTAINTER_NAME} || true\'                        
+                        ssh -o StrictHostKeyChecking=no -i ${keyfile} -y ${sshuser}@${PRODUCTION} -C \'docker run -d -p 80:8080 --name ${CONTAINTER_NAME} ${USERNAME}/${IMAGE_NAME}:${IMAGE_TAG}\'
+                        ssh -o StrictHostKeyChecking=no -i ${keyfile} -y ${sshuser}@${PRODUCTION} -C \'curl http://localhost:80\'
                     '''
                 }
             }
