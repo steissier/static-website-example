@@ -11,7 +11,7 @@ pipeline{
     
     stages {
         stage ('Build du conteneur') {
-            step {
+            steps {
                 script {
                     sh 'docker build -t ${IMAGE_NAME} .'
 
@@ -19,7 +19,7 @@ pipeline{
             }
         }
         stage ('Verification image') {
-            step {
+            steps {
                 script {
                     sh '''
                         docker run -d -p 80:8080 --name ${CONTAINTER_NAME} ${IMAGE_NAME}
@@ -32,7 +32,7 @@ pipeline{
             environment {
                 PASSWORD=credentials('dockerhub_password')
             }
-            step {
+            steps {
                 script {
                     sh '''
                         docker stop ${CONTAINTER_NAME}
@@ -50,7 +50,7 @@ pipeline{
             environment {
                 PASSWORD=credentials('credential_ec2')
             }
-            step {
+            steps {
                 withCredentials([sshUserPrivate(credentialsId: "credential_ec2", keyFileVariable: 'keyfile', username: 'sshuser')])
                 catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE')
                 script {
@@ -64,7 +64,7 @@ pipeline{
             }
         }
         stage ('Deploy prod') {
-            step {
+            steps {
                 withCredentials([sshUserPrivate(credentialsId: "credential_ec2", keyFileVariable: 'keyfile', username: 'sshuser')])
                 catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE')
                 script {
