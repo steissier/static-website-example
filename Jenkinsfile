@@ -11,6 +11,9 @@ pipeline{
     
     stages {
         stage ('Build du conteneur') {
+            agent {
+                label 'test'
+            }
             steps {
                 script {
                     sh 'docker build -t ${IMAGE_NAME} .'
@@ -18,6 +21,9 @@ pipeline{
             }
         }
         stage ('Verification image') {
+            agent {
+                label 'test'
+            }           
             steps {
                 script {
                     sh '''
@@ -31,6 +37,9 @@ pipeline{
             }   
         }
         stage ('Push image') {
+            agent {
+                label 'test'
+            }
             environment {
                 PASSWORD=credentials('dockerhub_password')
             }
@@ -55,7 +64,7 @@ pipeline{
                         sh '''
                             ssh -o StrictHostKeyChecking=no -i ${keyfile} -y ${sshuser}@${STAGING} -C docker stop ${CONTAINTER_NAME} || true
                             ssh -o StrictHostKeyChecking=no -i ${keyfile} -y ${sshuser}@${STAGING} -C docker rm ${CONTAINTER_NAME} || true                      
-                            ssh -o StrictHostKeyChecking=no -i ${keyfile} -y ${sshuser}@${PRODUCTION} -C docker image prune || true                       
+                            ssh -o StrictHostKeyChecking=no -i ${keyfile} -y ${sshuser}@${PRODUCTION} -C docker image prune -a || true                       
                             ssh -o StrictHostKeyChecking=no -i ${keyfile} -y ${sshuser}@${STAGING} -C docker run -d -p 80:80 --name ${CONTAINTER_NAME} ${USERNAME}/${IMAGE_NAME}:${IMAGE_TAG}
                             ssh -o StrictHostKeyChecking=no -i ${keyfile} -y ${sshuser}@${STAGING} -C sleep 5
                             ssh -o StrictHostKeyChecking=no -i ${keyfile} -y ${sshuser}@${STAGING} -C curl http://localhost:80
@@ -74,7 +83,7 @@ pipeline{
                         sh '''
                             ssh -o StrictHostKeyChecking=no -i ${keyfile} -y ${sshuser}@${PRODUCTION} -C docker stop ${CONTAINTER_NAME} || true
                             ssh -o StrictHostKeyChecking=no -i ${keyfile} -y ${sshuser}@${PRODUCTION} -C docker rm ${CONTAINTER_NAME} || true                       
-                            ssh -o StrictHostKeyChecking=no -i ${keyfile} -y ${sshuser}@${PRODUCTION} -C docker image prune || true                       
+                            ssh -o StrictHostKeyChecking=no -i ${keyfile} -y ${sshuser}@${PRODUCTION} -C docker image prune -a || true                       
                             ssh -o StrictHostKeyChecking=no -i ${keyfile} -y ${sshuser}@${PRODUCTION} -C docker run -d -p 80:80 --name ${CONTAINTER_NAME} ${USERNAME}/${IMAGE_NAME}:${IMAGE_TAG}
                             ssh -o StrictHostKeyChecking=no -i ${keyfile} -y ${sshuser}@${STAGING} -C sleep 5
                             ssh -o StrictHostKeyChecking=no -i ${keyfile} -y ${sshuser}@${PRODUCTION} -C curl http://localhost:80
