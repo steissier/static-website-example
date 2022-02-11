@@ -118,7 +118,7 @@ pipeline{
                                 ssh -o StrictHostKeyChecking=no -i ${keyfile} ${sshuser}@${PRODUCTION} docker stop $CONTAINTER_NAME || true
                                 ssh -o StrictHostKeyChecking=no -i ${keyfile} ${sshuser}@${PRODUCTION} docker rm $CONTAINTER_NAME || true
                                 ssh -o StrictHostKeyChecking=no -i ${keyfile} ${sshuser}@${PRODUCTION} docker rmi $USERNAME/$IMAGE_NAME:$IMAGE_TAG || true
-                                ssh -o StrictHostKeyChecking=no -i ${keyfile} ${sshuser}@${PRODUCTION} docker run --name ${CONTAINTER_NAME} -d -e PORT=5000 -p 80:5000 $USERNAME/$IMAGE_NAME:$IMAGE_TAG
+                                ssh -o StrictHostKeyChecking=no -i ${keyfile} ${sshuser}@${PRODUCTION} docker run --name ${CONTAINTER_NAME} -d -p 80:80 $USERNAME/$IMAGE_NAME:$IMAGE_TAG
                             '''
                         }
                     }
