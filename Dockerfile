@@ -1,7 +1,4 @@
-FROM ubuntu
-RUN apt-get update -y
-RUN apt-get install nginx -y
-RUN rm -f /var/www/html/*
+FROM nginx
 COPY . /var/www/html/
 EXPOSE 8080
-CMD ["/usr/sbin/nginx"]
+CMD ["/usr/sbin/nginx" "-g" "daemon off;"]
