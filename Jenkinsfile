@@ -22,8 +22,8 @@ pipeline{
             steps {
                 script {
                     sh '''
-                        docker run -d -p 80:8080 --name ${CONTAINTER_NAME} ${IMAGE_NAME}
-                        curl http://localhost:80 
+                        docker run -d -p 8081:8080 --name ${CONTAINTER_NAME} ${IMAGE_NAME}
+                        curl http://localhost:8081 
                     '''
                 }
             }   
