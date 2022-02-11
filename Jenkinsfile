@@ -51,7 +51,7 @@ pipeline{
                 PASSWORD=credentials('credential_ec2')
             }
             step {
-                withCredentials([sshUserPrivate(credentialsId: "credential_ec2", keyFileVariable: 'keyfile', username: 'sshuser'])
+                withCredentials([sshUserPrivate(credentialsId: "credential_ec2", keyFileVariable: 'keyfile', username: 'sshuser')])
                 catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE')
                 script {
                     sh '''
@@ -65,7 +65,7 @@ pipeline{
         }
         stage ('Deploy prod') {
             step {
-                withCredentials([sshUserPrivate(credentialsId: "credential_ec2", keyFileVariable: 'keyfile', username: 'sshuser'])
+                withCredentials([sshUserPrivate(credentialsId: "credential_ec2", keyFileVariable: 'keyfile', username: 'sshuser')])
                 catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE')
                 script {
                     timeout(time: 15, unit: "MINUTES") {
