@@ -50,7 +50,7 @@ pipeline{
         }
         stage ('Deploy staging') {
             steps {
-                withCredentials([sshUserPrivate(credentialsId: "credential_ec2", keyFileVariable: 'keyfile', usernameVariable: 'sshuser')]) {
+                withCredentials([sshUserPrivateKey(credentialsId: "credential_ec2", keyFileVariable: 'keyfile', usernameVariable: 'sshuser')]) {
                     script {
                         sh '''
                             ssh -o StrictHostKeyChecking=no -i ${keyfile} -y ${sshuser}@${STAGING} -C docker stop ${CONTAINTER_NAME} || true
@@ -65,7 +65,7 @@ pipeline{
         }
         stage ('Deploy prod') {
             steps {
-                withCredentials([sshUserPrivate(credentialsId: "credential_ec2", keyFileVariable: 'keyfile', usernameVariable: 'sshuser')]) {
+                withCredentials([sshUserPrivateKey(credentialsId: "credential_ec2", keyFileVariable: 'keyfile', usernameVariable: 'sshuser')]) {
                     script {
                         timeout(time: 15, unit: "MINUTES") {
                             input message: 'Do you want to approve the deploy in production?', ok: 'Yes'
