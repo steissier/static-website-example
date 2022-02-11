@@ -64,7 +64,7 @@ pipeline{
                         sh '''
                             ssh -o StrictHostKeyChecking=no -i ${keyfile} -y ${sshuser}@${STAGING} -C docker stop ${CONTAINTER_NAME} || true
                             ssh -o StrictHostKeyChecking=no -i ${keyfile} -y ${sshuser}@${STAGING} -C docker rm ${CONTAINTER_NAME} || true                      
-                            ssh -o StrictHostKeyChecking=no -i ${keyfile} -y ${sshuser}@${PRODUCTION} -C docker image prune -a || true                       
+                            ssh -o StrictHostKeyChecking=no -i ${keyfile} -y ${sshuser}@${PRODUCTION} -C docker image prune -af || true                       
                             ssh -o StrictHostKeyChecking=no -i ${keyfile} -y ${sshuser}@${STAGING} -C docker run -d -p 80:80 --name ${CONTAINTER_NAME} ${USERNAME}/${IMAGE_NAME}:${IMAGE_TAG}
                             ssh -o StrictHostKeyChecking=no -i ${keyfile} -y ${sshuser}@${STAGING} -C sleep 5
                             ssh -o StrictHostKeyChecking=no -i ${keyfile} -y ${sshuser}@${STAGING} -C curl http://localhost:80
@@ -73,7 +73,8 @@ pipeline{
                 }
             }
         }
-        stage ('Deploy prod') {
+
+ /*       stage ('Deploy prod') {
             steps {
                 withCredentials([sshUserPrivateKey(credentialsId: "credential_ec2", keyFileVariable: 'keyfile', usernameVariable: 'sshuser')]) {
                     script {
@@ -83,11 +84,43 @@ pipeline{
                         sh '''
                             ssh -o StrictHostKeyChecking=no -i ${keyfile} -y ${sshuser}@${PRODUCTION} -C docker stop ${CONTAINTER_NAME} || true
                             ssh -o StrictHostKeyChecking=no -i ${keyfile} -y ${sshuser}@${PRODUCTION} -C docker rm ${CONTAINTER_NAME} || true                       
-                            ssh -o StrictHostKeyChecking=no -i ${keyfile} -y ${sshuser}@${PRODUCTION} -C docker image prune -a || true                       
+                            ssh -o StrictHostKeyChecking=no -i ${keyfile} -y ${sshuser}@${PRODUCTION} -C docker image prune -af || true                       
                             ssh -o StrictHostKeyChecking=no -i ${keyfile} -y ${sshuser}@${PRODUCTION} -C docker run -d -p 80:80 --name ${CONTAINTER_NAME} ${USERNAME}/${IMAGE_NAME}:${IMAGE_TAG}
                             ssh -o StrictHostKeyChecking=no -i ${keyfile} -y ${sshuser}@${STAGING} -C sleep 5
                             ssh -o StrictHostKeyChecking=no -i ${keyfile} -y ${sshuser}@${PRODUCTION} -C curl http://localhost:80
                         '''
+                    }
+                }
+            }
+        }
+    */
+        stage('Deploy prod') {
+            agent {
+                docker {
+                    image('alpine')
+                    args ' -u root'
+                }
+            }
+            when{
+                expression{ GIT_BRANCH == 'origin/master' && DEPLOY_APP != 'yes'}
+            }
+            steps{
+                withCredentials([sshUserPrivateKey(credentialsId: "credential_ec2", keyFileVariable: 'keyfile', usernameVariable: 'sshuser')]) {
+                    catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+                        script{
+                            timeout(time: 15, unit: "MINUTES") {
+                                input message: 'Do you want to approve the deploy in production?', ok: 'Yes'
+                            }						
+                            sh'''
+                                apk update
+                                which ssh-agent || ( apk add openssh-client )
+                                eval $(ssh-agent -s)
+                                ssh -o StrictHostKeyChecking=no -i ${keyfile} ${sshuser}@${PRODUCTION} docker stop $CONTAINER_NAME || true
+                                ssh -o StrictHostKeyChecking=no -i ${keyfile} ${sshuser}@${PRODUCTION} docker rm $CONTAINER_NAME || true
+                                ssh -o StrictHostKeyChecking=no -i ${keyfile} ${sshuser}@${PRODUCTION} docker rmi $USERNAME/$IMAGE_NAME:$IMAGE_TAG || true
+                                ssh -o StrictHostKeyChecking=no -i ${keyfile} ${sshuser}@${PRODUCTION} docker run --name $CONTAINER_NAME -d -e PORT=5000 -p 80:5000 $USERNAME/$IMAGE_NAME:$IMAGE_TAG
+                            '''
+                        }
                     }
                 }
             }
